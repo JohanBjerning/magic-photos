@@ -1,0 +1,2 @@
+# magic-photos
+Hackathon project
