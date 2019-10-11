@@ -1,25 +1,47 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import bootstrap from './axios';
+import ErrorBoundary from './error-boundary';
+import Login from './login';
+import Account from './account';
+import AppList from './app-list';
+import useBackend from './use-backend';
+import {getWebIntegrationId, getTenantUrl} from './util';
+
+require('babel-polyfill');
 
 function App() {
+
+  const url = new URL(window.location.href);
+
+  const tenantUrl = getTenantUrl();
+
+  const webIntegrationId = getWebIntegrationId();
+
+  bootstrap(tenantUrl, webIntegrationId);
+
+  const [user, userError, userIsLoading] = useBackend({ url: '/v1/users/me' });
+  const needsLogin = userError && userError.response && userError.response.status === 401;
+  let view;
+
+  if (userIsLoading) {
+    view = (<p>Loading...</p>);
+  } else if (needsLogin) {
+    view = <Login tenantUrl={tenantUrl} webIntegrationId={webIntegrationId} />
+  } else if (userError) {
+    view = (<div>Unable to fetch user, likely misconfigured tenant/web integration. <pre><code>{userError.stack}</code></pre></div>);
+  } else {
+    view = (
+    <React.Fragment>
+      <Account tenantUrl={tenantUrl} />
+      <AppList tenantUrl={tenantUrl} userId={user.id} />
+    </React.Fragment>
+    );
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ErrorBoundary>{view}</ErrorBoundary>
   );
 }
 
