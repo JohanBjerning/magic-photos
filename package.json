@@ -14,7 +14,7 @@
     "react-dom": "^16.10.2",
     "react-scripts": "3.2.0",
     "react-use-promise": "^0.2.0",
-    "ws": "^7.1.2"
+    "ws": "^7.1.2",
     "flickr-sdk": "3.9.0"
   },
   "scripts": {
